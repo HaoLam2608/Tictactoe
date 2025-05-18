@@ -60,8 +60,8 @@ public class CampaignStage1 extends PlayWithAiCaro {
                                 currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                             }
                             else {
-                                HeuristicBot botRun = new HeuristicBot(ROWS, COLS, Seed.NOUGHT, Seed.CROSS);
-                                String run = botRun.getPoint(board);
+                                MinimaxHeuristicBot botRun = new MinimaxHeuristicBot(ROWS, COLS, Seed.NOUGHT, Seed.CROSS);
+                                String run = botRun.getBestMove(board);
                                 String[] splStr = run.split(" ");
                                 rowSelected = Integer.parseInt(splStr[0]);
                                 colSelected = Integer.parseInt(splStr[1]);

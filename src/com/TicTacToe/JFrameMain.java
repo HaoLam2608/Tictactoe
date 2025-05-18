@@ -1,16 +1,10 @@
 package com.TicTacToe;
 
 import com.TicTacToe.Campaign.Campaign;
-import com.TicTacToe.Caro.ModChap1Nuoc2NguoiCaro;
-import com.TicTacToe.Caro.ModChap1NuocVSMayCaro;
 import com.TicTacToe.Caro.Play2PlayersCaro;
 import com.TicTacToe.Caro.PlayWithAiCaro;
-import com.TicTacToe.Connect4.ModChap1Nuoc2NguoiConnect4;
-import com.TicTacToe.Connect4.ModChap1NuocVSMayConnect4;
 import com.TicTacToe.Connect4.Play2PlayersConnect4;
 import com.TicTacToe.Connect4.PlayWithAiConnect4;
-import com.TicTacToe.TicTacToe.ModChap1Nuoc2Nguoi;
-import com.TicTacToe.TicTacToe.ModChap1NuocVSMay;
 import com.TicTacToe.TicTacToe.Play2Players;
 import com.TicTacToe.TicTacToe.PlayWithAI;
 
@@ -19,9 +13,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 
 public class JFrameMain {
+
     public static JFrame jFrame;
     private JPanel JPanelMain;
     private JButton btnPlay2Players;
@@ -30,7 +25,6 @@ public class JFrameMain {
     private JTextField txtPlayer2Name;
     private JButton btnExit;
     private JButton btnHighScore;
-    private JCheckBox cbxModChap1Buoc;
     private JSpinner spinnerRow;
     private JButton btnCampaign;
     private JComboBox<String> gameTypeComboBox;
@@ -101,15 +95,6 @@ public class JFrameMain {
         gbc.gridy = 1;
         centerPanel.add(settingsPanel, gbc);
 
-        // Game mode checkbox
-        cbxModChap1Buoc = new JCheckBox("Handicap Mode (Player gets first 2 moves)");
-        cbxModChap1Buoc.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cbxModChap1Buoc.setBackground(new Color(240, 240, 240));
-
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        centerPanel.add(cbxModChap1Buoc, gbc);
-
         // Button panel
         JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 10, 10));
         buttonPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
@@ -127,14 +112,14 @@ public class JFrameMain {
         buttonPanel.add(btnHighScore);
         buttonPanel.add(btnExit);
 
-        gbc.gridy = 3;
+        gbc.gridy = 2;
         centerPanel.add(buttonPanel, gbc);
 
         JPanelMain.add(centerPanel, BorderLayout.CENTER);
 
         // Add action listeners
         setupActionListeners();
-        
+
         // Add game type selection listener to update spinner
         gameTypeComboBox.addActionListener(e -> {
             switch (gameTypeComboBox.getSelectedIndex()) {
@@ -158,13 +143,31 @@ public class JFrameMain {
     }
 
     private JTextField createStyledTextField(String placeholder) {
-        JTextField field = new JTextField(15);
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-        field.setText(placeholder);
+        JTextField field = new JTextField(15) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Background rounded
+                g2.setColor(new Color(255, 255, 255, 230));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
+
+                // Border shadow
+                g2.setColor(new Color(200, 200, 200));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
+
+                super.paintComponent(g2);
+                g2.dispose();
+            }
+        };
+
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        field.setOpaque(false);
         field.setForeground(Color.GRAY);
+        field.setText(placeholder);
+        field.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+
         field.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 if (field.getText().equals(placeholder)) {
@@ -175,35 +178,55 @@ public class JFrameMain {
 
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (field.getText().isEmpty()) {
-                    field.setForeground(Color.GRAY);
                     field.setText(placeholder);
+                    field.setForeground(Color.GRAY);
                 }
             }
         });
+
         return field;
     }
 
     private JButton createButton(String text, Color bgColor) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        button.setBackground(bgColor);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        // Add hover effect
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(bgColor.darker());
+        JButton button = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setPaint(new GradientPaint(0, 0, bgColor, getWidth(), getHeight(), bgColor.darker()));
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+                g2d.dispose();
+                super.paintComponent(g);
             }
 
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(bgColor);
+            @Override
+            protected void paintBorder(Graphics g) {
+                // No border
+            }
+        };
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        button.setFocusPainted(false);
+        button.setContentAreaFilled(false);
+        button.setOpaque(false);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setPreferredSize(new Dimension(300, 50));
+        // Add hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                button.setFont(button.getFont().deriveFont(Font.BOLD, 18f));
+            }
+
+            public void mouseExited(MouseEvent e) {
+                button.setFont(button.getFont().deriveFont(Font.BOLD, 16f));
             }
         });
-        
+
         return button;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(JFrameMain::new);
     }
 
     private void setupActionListeners() {
@@ -215,11 +238,11 @@ public class JFrameMain {
                 JOptionPane.showMessageDialog(null, "Please enter your name!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
+
             int row = (int) spinnerRow.getValue();
             if (row < 3 || row > 20) {
-                JOptionPane.showMessageDialog(null, "Row/Column size must be between 3 and 20!", 
-                    "Invalid Size", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Row/Column size must be between 3 and 20!",
+                        "Invalid Size", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -228,47 +251,21 @@ public class JFrameMain {
             int resultLevel = JOptionPane.showOptionDialog(null, "Select difficulty level", "Difficulty",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 
-            if (cbxModChap1Buoc.isSelected()) {
-                Object[] handicapOptions = {"Player 1", "Computer"};
-                int result = JOptionPane.showOptionDialog(null, "Who gets the first 2 moves?", "Handicap",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, handicapOptions, handicapOptions[1]);
-
-                if (row >= 5) { // Caro
-                    ModChap1NuocVSMayCaro.newRow = row;
-                    ModChap1NuocVSMayCaro modChap1NuocVSMay = new ModChap1NuocVSMayCaro(Player1Name);
-                    modChap1NuocVSMay.Player1TwoMove = (result == JOptionPane.YES_OPTION);
-                    modChap1NuocVSMay.GameBot = (resultLevel == JOptionPane.YES_OPTION) ? 
-                            PlayWithAI.Bot.EASY_BOT : PlayWithAI.Bot.HEURISTIC_BOT;
-                } else if (row == 3) { // Tic Tac Toe
-                    ModChap1NuocVSMay.newRow = row;
-                    ModChap1NuocVSMay modChap1NuocVSMay = new ModChap1NuocVSMay(Player1Name);
-                    modChap1NuocVSMay.Player1TwoMove = (result == JOptionPane.YES_OPTION);
-                    modChap1NuocVSMay.GameBot = (resultLevel == JOptionPane.YES_OPTION) ? 
-                            PlayWithAI.Bot.EASY_BOT : PlayWithAI.Bot.HEURISTIC_BOT;
-                } else if (row == 4) { // Connect 4
-                    ModChap1NuocVSMayConnect4.newRow = row;
-                    ModChap1NuocVSMayConnect4 modChap1NuocVSMay = new ModChap1NuocVSMayConnect4(Player1Name);
-                    ModChap1NuocVSMayConnect4.Player1TwoMove = (result == JOptionPane.YES_OPTION);
-                    ModChap1NuocVSMayConnect4.GameBot = (resultLevel == JOptionPane.YES_OPTION) ? 
-                            PlayWithAI.Bot.EASY_BOT : PlayWithAI.Bot.HEURISTIC_BOT;
-                }
-            } else {
-                if (row >= 5) { // Caro
-                    PlayWithAiCaro.GameBot = (resultLevel == JOptionPane.YES_OPTION) ? 
-                            PlayWithAI.Bot.EASY_BOT : PlayWithAI.Bot.HEURISTIC_BOT;
-                    PlayWithAiCaro.newRow = row;
-                    new PlayWithAiCaro(Player1Name);
-                } else if (row == 3) { // Tic Tac Toe
-                    PlayWithAI.GameBot = (resultLevel == JOptionPane.YES_OPTION) ? 
-                            PlayWithAI.Bot.EASY_BOT : PlayWithAI.Bot.HEURISTIC_BOT;
-                    PlayWithAI.newRow = row;
-                    new PlayWithAI(Player1Name);
-                } else if (row == 4) { // Connect 4
-                    PlayWithAiConnect4.GameBot = (resultLevel == JOptionPane.YES_OPTION) ? 
-                            PlayWithAI.Bot.EASY_BOT : PlayWithAI.Bot.HEURISTIC_BOT;
-                    PlayWithAiConnect4.newRow = row;
-                    new PlayWithAiConnect4(Player1Name);
-                }
+            if (row >= 5) { // Caro
+                PlayWithAiCaro.GameBot = (resultLevel == JOptionPane.YES_OPTION)
+                        ? PlayWithAI.Bot.EASY_BOT : PlayWithAI.Bot.HEURISTIC_BOT;
+                PlayWithAiCaro.newRow = row;
+                new PlayWithAiCaro(Player1Name);
+            } else if (row == 3) { // Tic Tac Toe
+                PlayWithAI.GameBot = (resultLevel == JOptionPane.YES_OPTION)
+                        ? PlayWithAI.Bot.EASY_BOT : PlayWithAI.Bot.HEURISTIC_BOT;
+                PlayWithAI.newRow = row;
+                new PlayWithAI(Player1Name);
+            } else if (row == 4) { // Connect 4
+                PlayWithAiConnect4.GameBot = (resultLevel == JOptionPane.YES_OPTION)
+                        ? PlayWithAI.Bot.EASY_BOT : PlayWithAI.Bot.HEURISTIC_BOT;
+                PlayWithAiConnect4.newRow = row;
+                new PlayWithAiConnect4(Player1Name);
             }
             jFrame.setVisible(false);
         });
@@ -276,49 +273,29 @@ public class JFrameMain {
         btnPlay2Players.addActionListener(e -> {
             String Player1Name = txtPlayer1Name.getText();
             String Player2Name = txtPlayer2Name.getText();
-            if (Player1Name.isEmpty() || Player1Name.equals("Player 1") || 
-                Player2Name.isEmpty() || Player2Name.equals("Player 2")) {
-                JOptionPane.showMessageDialog(null, "Please enter both players' names!", 
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            if (Player1Name.isEmpty() || Player1Name.equals("Player 1")
+                    || Player2Name.isEmpty() || Player2Name.equals("Player 2")) {
+                JOptionPane.showMessageDialog(null, "Please enter both players' names!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
+
             int row = (int) spinnerRow.getValue();
             if (row < 3 || row > 20) {
-                JOptionPane.showMessageDialog(null, "Row/Column size must be between 3 and 20!", 
-                    "Invalid Size", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Row/Column size must be between 3 and 20!",
+                        "Invalid Size", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            if (cbxModChap1Buoc.isSelected()) {
-                Object[] options = {"Player 1", "Player 2"};
-                int result = JOptionPane.showOptionDialog(null, "Who gets the first 2 moves?", "Handicap",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-
-                if (row >= 5) { // Caro
-                    ModChap1Nuoc2NguoiCaro.newRow = row;
-                    ModChap1Nuoc2NguoiCaro modChap1Nuoc2Nguoi = new ModChap1Nuoc2NguoiCaro(Player1Name, Player2Name);
-                    modChap1Nuoc2Nguoi.Player1TwoMove = (result == JOptionPane.YES_OPTION);
-                } else if (row == 3) { // Tic Tac Toe
-                    ModChap1Nuoc2Nguoi.newRow = row;
-                    ModChap1Nuoc2Nguoi modChap1Nuoc2Nguoi = new ModChap1Nuoc2Nguoi(Player1Name, Player2Name);
-                    modChap1Nuoc2Nguoi.Player1TwoMove = (result == JOptionPane.YES_OPTION);
-                } else if (row == 4) { // Connect 4
-                    ModChap1Nuoc2NguoiConnect4.newRow = row;
-                    ModChap1Nuoc2NguoiConnect4 modChap1Nuoc2Nguoi = new ModChap1Nuoc2NguoiConnect4(Player1Name, Player2Name);
-                    modChap1Nuoc2Nguoi.Player1TwoMove = (result == JOptionPane.YES_OPTION);
-                }
-            } else {
-                if (row >= 5) { // Caro
-                    Play2PlayersCaro.newRow = row;
-                    new Play2PlayersCaro(Player1Name, Player2Name);
-                } else if (row == 3) { // Tic Tac Toe
-                    Play2Players.newRow = row;
-                    new Play2Players(Player1Name, Player2Name);
-                } else if (row == 4) { // Connect 4
-                    Play2PlayersConnect4.newRow = row;
-                    new Play2PlayersConnect4(Player1Name, Player2Name);
-                }
+            if (row >= 5) { // Caro
+                Play2PlayersCaro.newRow = row;
+                new Play2PlayersCaro(Player1Name, Player2Name);
+            } else if (row == 3) { // Tic Tac Toe
+                Play2Players.newRow = row;
+                new Play2Players(Player1Name, Player2Name);
+            } else if (row == 4) { // Connect 4
+                Play2PlayersConnect4.newRow = row;
+                new Play2PlayersConnect4(Player1Name, Player2Name);
             }
             jFrame.setVisible(false);
         });

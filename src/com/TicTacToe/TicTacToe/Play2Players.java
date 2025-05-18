@@ -273,67 +273,81 @@ public class Play2Players extends JFrame {
      *  Inner class DrawCanvas (extends JPanel) used for custom graphics drawing.
      */
     public class DrawCanvas extends JPanel {
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
 
+        // Gradient background
+        GradientPaint gradient = new GradientPaint(0, 0, new Color(255, 255, 255),
+                                                   0, getHeight(), new Color(230, 230, 230));
+        g2d.setPaint(gradient);
+        g2d.fillRect(0, 0, getWidth(), getHeight());
 
+        // Enable antialiasing
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        @Override
-        public void paintComponent(Graphics g) {  // invoke via repaint()
-            super.paintComponent(g);    // fill background
-            setBackground(Color.WHITE); // set its background color
+        // Draw rounded cell backgrounds
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                int x = col * CELL_SIZE + 1;
+                int y = row * CELL_SIZE + 1;
 
-            // Draw the grid-lines
-            g.setColor(Color.LIGHT_GRAY);
-            for (int row = 1; row < ROWS; ++row) {
-                g.fillRoundRect(0, CELL_SIZE * row - GRID_WIDHT_HALF,
-                        CANVAS_WIDTH-1, GRID_WIDTH, GRID_WIDTH, GRID_WIDTH);
-            }
-            for (int col = 1; col < COLS; ++col) {
-                g.fillRoundRect(CELL_SIZE * col - GRID_WIDHT_HALF, 0,
-                        GRID_WIDTH, CANVAS_HEIGHT-1, GRID_WIDTH, GRID_WIDTH);
-            }
-
-            // Draw the Seeds of all the cells if they are not empty
-            // Use Graphics2D which allows us to set the pen's stroke
-            Graphics2D g2d = (Graphics2D)g;
-            g2d.setStroke(new BasicStroke(SYMBOL_STROKE_WIDTH, BasicStroke.CAP_ROUND,
-                    BasicStroke.JOIN_ROUND));  // Graphics2D only
-            for (int row = 0; row < ROWS; ++row) {
-                for (int col = 0; col < COLS; ++col) {
-                    int x1 = col * CELL_SIZE + CELL_PADDING;
-                    int y1 = row * CELL_SIZE + CELL_PADDING;
-                    if (board[row][col] == Seed.CROSS) {
-                        g2d.setColor(Color.RED);
-                        int x2 = (col + 1) * CELL_SIZE - CELL_PADDING;
-                        int y2 = (row + 1) * CELL_SIZE - CELL_PADDING;
-                        g2d.drawLine(x1, y1, x2, y2);
-                        g2d.drawLine(x2, y1, x1, y2);
-                    } else if (board[row][col] == Seed.NOUGHT) {
-                        g2d.setColor(Color.BLUE);
-                        g2d.drawOval(x1, y1, SYMBOL_SIZE, SYMBOL_SIZE);
-                    }
-                }
-            }
-
-            // Print status-bar message
-            if (currentState == Play2Players.GameState.PLAYING) {
-                statusBar.setForeground(Color.BLACK);
-                if (currentPlayer == Play2Players.Seed.CROSS) {
-                    statusBar.setText("Lượt của "+Player1Name);
-                } else {
-                    statusBar.setText("Lượt của "+Player2Name);
-                }
-            } else if (currentState == Play2Players.GameState.DRAW) {
-                statusBar.setForeground(Color.RED);
-                statusBar.setText("Hòa rồi! Click chuột để chơi lại");
-            } else if (currentState == Play2Players.GameState.CROSS_WON) {
-                statusBar.setForeground(Color.RED);
-                statusBar.setText(Player1Name+" thắng rồi! Click chuột để chơi lại");
-            } else if (currentState == Play2Players.GameState.NOUGHT_WON) {
-                statusBar.setForeground(Color.RED);
-                statusBar.setText(Player2Name+" thắng rồi! Click chuột để chơi lại");
+                g2d.setColor(new Color(245, 245, 245));
+                g2d.fillRoundRect(x, y, CELL_SIZE - 2, CELL_SIZE - 2, 20, 20);
             }
         }
+
+        // Draw grid lines (soft gray, thin, rounded)
+        g2d.setColor(new Color(160, 160, 160, 120));
+        g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        for (int i = 1; i < ROWS; i++) {
+            int y = i * CELL_SIZE;
+            g2d.drawLine(0, y, CELL_SIZE * COLS, y);
+        }
+        for (int i = 1; i < COLS; i++) {
+            int x = i * CELL_SIZE;
+            g2d.drawLine(x, 0, x, CELL_SIZE * ROWS);
+        }
+
+        // Draw symbols (X and O)
+        g2d.setStroke(new BasicStroke(5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        for (int row = 0; row < ROWS; ++row) {
+            for (int col = 0; col < COLS; ++col) {
+                int x1 = col * CELL_SIZE + CELL_PADDING;
+                int y1 = row * CELL_SIZE + CELL_PADDING;
+
+                if (board[row][col] == Seed.CROSS) {
+                    g2d.setColor(new Color(220, 20, 60)); // Crimson red
+                    int x2 = (col + 1) * CELL_SIZE - CELL_PADDING;
+                    int y2 = (row + 1) * CELL_SIZE - CELL_PADDING;
+                    g2d.drawLine(x1, y1, x2, y2);
+                    g2d.drawLine(x2, y1, x1, y2);
+                } else if (board[row][col] == Seed.NOUGHT) {
+                    g2d.setColor(new Color(30, 144, 255)); // Dodger blue
+                    g2d.drawOval(x1, y1, SYMBOL_SIZE, SYMBOL_SIZE);
+                }
+            }
+        }
+
+        // Draw status (optional - can integrate into statusBar instead)
+        if (currentState == GameState.PLAYING) {
+            statusBar.setForeground(Color.DARK_GRAY);
+            statusBar.setText("Lượt của " + (currentPlayer == Seed.CROSS ? Player1Name : Player2Name));
+        } else if (currentState == GameState.DRAW) {
+            statusBar.setForeground(Color.RED);
+            statusBar.setText("Hòa rồi! Click chuột để chơi lại");
+        } else if (currentState == GameState.CROSS_WON) {
+            statusBar.setForeground(Color.RED);
+            statusBar.setText(Player1Name + " thắng rồi! Click chuột để chơi lại");
+        } else if (currentState == GameState.NOUGHT_WON) {
+            statusBar.setForeground(Color.RED);
+            statusBar.setText(Player2Name + " thắng rồi! Click chuột để chơi lại");
+        }
     }
+}
+
+
 
     public boolean CheckAdjacent(int x, int y){
         if(x== rowPreSelected +1 && y== colPreSelected) return true;

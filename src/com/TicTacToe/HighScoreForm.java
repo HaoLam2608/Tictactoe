@@ -16,37 +16,39 @@ public class HighScoreForm extends JFrame {
     private JTable tblHighScore;
     private JPanel panel1;
     private DefaultTableModel model;
-    void CreateAndShow(){
-        new File("C:\\Test").mkdir();
-        tblHighScore.setPreferredSize(new Dimension(300,300));
+
+    void CreateAndShow() {
+        new File("D:\\Test").mkdir();
+
+        tblHighScore = new JTable(); 
+
+        tblHighScore.setPreferredSize(new Dimension(300, 300));
         this.add(new JScrollPane(tblHighScore));
-            pack();  // pack all the components in this JFrame
-            setTitle("High Score");
-            setLocationRelativeTo(null);
-            setVisible(true);
-            addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    jFrame.setVisible(true);
-                }
-            });
+        pack();
+        setTitle("High Score");
+        setLocationRelativeTo(null);
+        setVisible(true);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                jFrame.setVisible(true);
+            }
+        });
 
+        model = new DefaultTableModel();
+        Vector column = new Vector();
+        column.add("Tên người chơi");
+        column.add("Thắng");
+        column.add("Thua");
+        model.setColumnIdentifiers(column);
 
-            model = new DefaultTableModel();
-            Vector column = new Vector();
-            column.add("Tên người chơi");
-            column.add("Thắng");
-            column.add("Thua");
-            model.setColumnIdentifiers(column);
-
-
-            ArrayList<String> listPlayers = new ArrayList<>();
+        ArrayList<String> listPlayers = new ArrayList<>();
         try {
             listPlayers = GetAndSetHighScore.getAll(GetAndSetHighScore.FILE_NAME);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        for (String playerName: listPlayers) {
+        for (String playerName : listPlayers) {
             Vector row = new Vector();
             row.add(playerName);
             try {
