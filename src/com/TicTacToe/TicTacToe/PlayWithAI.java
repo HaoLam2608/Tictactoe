@@ -268,7 +268,10 @@ public class PlayWithAI extends Play2Players {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                jFrame.setVisible(true);
+                dispose(); // Đóng cửa sổ hiện tại
+                if (jFrame != null) {
+                    jFrame.setVisible(true); // Hiển thị lại CaroForm
+                }
             }
         });
     }

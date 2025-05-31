@@ -183,10 +183,14 @@ public class Play2Players extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);  // show this JFrame
 
+       // Sửa WindowListener để quay lại CaroForm
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                jFrame.setVisible(true);
+                dispose(); // Đóng cửa sổ hiện tại
+                if (jFrame != null) {
+                    jFrame.setVisible(true); // Hiển thị lại CaroForm
+                }
             }
         });
 
