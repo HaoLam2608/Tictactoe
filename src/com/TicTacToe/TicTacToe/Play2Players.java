@@ -215,31 +215,17 @@ public class Play2Players extends JFrame {
     /** Update the currentState after the player with "theSeed" has placed on
      (rowSelected, colSelected). */
     public void updateGame(Seed theSeed, int rowSelected, int colSelected) {
-        if (hasWon(theSeed, rowSelected, colSelected)) {  // check for win
+        if (hasWon(theSeed, rowSelected, colSelected)) {
             currentState = (theSeed == Seed.CROSS) ? GameState.CROSS_WON : GameState.NOUGHT_WON;
-
-            if(theSeed == Seed.CROSS){
-                try {
-                    GetAndSetHighScore.ghiFile(GetAndSetHighScore.FILE_NAME,Player1Name,Player2Name);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                JOptionPane.showMessageDialog(null,Player1Name+" thắng rồi! Click chuột để chơi lại");
-            }
-            else {
-
-                    try {
-                        GetAndSetHighScore.ghiFile(GetAndSetHighScore.FILE_NAME,Player2Name,Player1Name);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                JOptionPane.showMessageDialog(null, Player2Name + " thắng rồi! Click chuột để chơi lại");
-                }
-        } else if (isDraw()) {  // check for draw
+            String winnerName = (theSeed == Seed.CROSS) ? Player1Name : Player2Name;
+            JOptionPane.showMessageDialog(this, winnerName + " đã thắng! Click chuột để chơi lại.");
+            // Ghi điểm cao
+            HighScoreManager manager = new HighScoreManager();
+            manager.addScore(winnerName, 1); // +1 điểm cho thắng PvP
+        } else if (isDraw()) {
             currentState = GameState.DRAW;
-            JOptionPane.showMessageDialog(null,"Hòa rồi! Click chuột để chơi lại");
+            JOptionPane.showMessageDialog(this, "Hòa rồi! Click chuột để chơi lại.");
         }
-        // Otherwise, no change to current state (still GameState.PLAYING).
     }
 
     /** Return true if it is a draw (i.e., no more empty cell) */
@@ -257,20 +243,44 @@ public class Play2Players extends JFrame {
     /** Return true if the player with "theSeed" has won after placing at
      (rowSelected, colSelected) */
     public boolean hasWon(Seed theSeed, int rowSelected, int colSelected) {
-        return (board[rowSelected][0] == theSeed  // 3-in-the-row
-                && board[rowSelected][1] == theSeed
-                && board[rowSelected][2] == theSeed
-                || board[0][colSelected] == theSeed      // 3-in-the-column
-                && board[1][colSelected] == theSeed
-                && board[2][colSelected] == theSeed
-                || rowSelected == colSelected            // 3-in-the-diagonal
-                && board[0][0] == theSeed
-                && board[1][1] == theSeed
-                && board[2][2] == theSeed
-                || rowSelected + colSelected == 2  // 3-in-the-opposite-diagonal
-                && board[0][2] == theSeed
-                && board[1][1] == theSeed
-                && board[2][0] == theSeed);
+        // Cập nhật luật thắng: 5 ô liên tiếp
+        for (int j = Math.max(0, colSelected - 4); j <= Math.min(COLS - 5, colSelected); j++) {
+            if (board[rowSelected][j] == theSeed && board[rowSelected][j + 1] == theSeed &&
+                board[rowSelected][j + 2] == theSeed && board[rowSelected][j + 3] == theSeed &&
+                board[rowSelected][j + 4] == theSeed) {
+                return true;
+            }
+        }
+        for (int i = Math.max(0, rowSelected - 4); i <= Math.min(ROWS - 5, rowSelected); i++) {
+            if (board[i][colSelected] == theSeed && board[i + 1][colSelected] == theSeed &&
+                board[i + 2][colSelected] == theSeed && board[i + 3][colSelected] == theSeed &&
+                board[i + 4][colSelected] == theSeed) {
+                return true;
+            }
+        }
+        for (int k = -4; k <= 0; k++) {
+            int r = rowSelected + k;
+            int c = colSelected + k;
+            if (r >= 0 && r + 4 < ROWS && c >= 0 && c + 4 < COLS) {
+                if (board[r][c] == theSeed && board[r + 1][c + 1] == theSeed &&
+                    board[r + 2][c + 2] == theSeed && board[r + 3][c + 3] == theSeed &&
+                    board[r + 4][c + 4] == theSeed) {
+                    return true;
+                }
+            }
+        }
+        for (int k = -4; k <= 0; k++) {
+            int r = rowSelected + k;
+            int c = colSelected - k;
+            if (r >= 0 && r + 4 < ROWS && c - 4 >= 0 && c < COLS) {
+                if (board[r][c] == theSeed && board[r + 1][c - 1] == theSeed &&
+                    board[r + 2][c - 2] == theSeed && board[r + 3][c - 3] == theSeed &&
+                    board[r + 4][c - 4] == theSeed) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

@@ -4,6 +4,7 @@
  */
 package GUI;
 
+import com.TicTacToe.Campaign.Campaign;
 import com.TicTacToe.Caro.Play2PlayersCaro;
 import com.TicTacToe.Caro.PlayWithAiCaro;
 import com.TicTacToe.JFrameMain;
@@ -35,7 +36,7 @@ public class CaroForm extends javax.swing.JFrame {
     public CaroForm() {
 
         initComponents();
-        
+
         JFrameMain.jFrame = this;
         ImageIcon gifIcon = new ImageIcon(getClass().getResource("/RES/fox.gif"));
         anhdong.setIcon(gifIcon);
@@ -45,12 +46,15 @@ public class CaroForm extends javax.swing.JFrame {
         ImageIcon gifIcon1 = new ImageIcon(getClass().getResource("/RES/wasp.gif"));
         anhdong1.setIcon(gifIcon1);
         anhdong1.setBounds(560, 340, gifIcon1.getIconWidth(), gifIcon1.getIconHeight());
-        
+
         jSpinnerdorongbang.setModel(new SpinnerNumberModel(5, 5, 20, 1));
         jSpinnerdorongbang.setEnabled(false);
+
+        setLocationRelativeTo(null);
     }
 
     private Clip clip;
+    private boolean isPlaying = true; // ban đầu đang phát nhạc
 
 // Hàm này dùng để load và phát nhạc nền
     private void playBackgroundMusic(String path) {
@@ -91,6 +95,7 @@ public class CaroForm extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         anhdong = new javax.swing.JLabel();
         anhdong1 = new javax.swing.JLabel();
+        offclip = new javax.swing.JButton();
         anhnen = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -128,6 +133,11 @@ public class CaroForm extends javax.swing.JFrame {
         btnhighscore.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         btnhighscore.setForeground(new java.awt.Color(255, 255, 255));
         btnhighscore.setLabel("High Scores");
+        btnhighscore.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnhighscoreActionPerformed(evt);
+            }
+        });
         getContentPane().add(btnhighscore, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 420, 200, 40));
 
         btnplaywithplayer.setActionCommand("Exit");
@@ -166,12 +176,10 @@ public class CaroForm extends javax.swing.JFrame {
 
         player1.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         player1.setForeground(new java.awt.Color(204, 204, 204));
-        player1.setText("Tên người chơi 2");
         getContentPane().add(player1, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 170, 190, 30));
 
         player2.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         player2.setForeground(new java.awt.Color(204, 204, 204));
-        player2.setText("Tên người chơi 1");
         getContentPane().add(player2, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 120, 190, 30));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -212,6 +220,15 @@ public class CaroForm extends javax.swing.JFrame {
         anhdong1.setToolTipText("");
         getContentPane().add(anhdong1, new org.netbeans.lib.awtextra.AbsoluteConstraints(910, 150, -1, -1));
 
+        offclip.setIcon(new javax.swing.ImageIcon(getClass().getResource("/RES/icvolume.jpg"))); // NOI18N
+        offclip.setText("jButton1");
+        offclip.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                offclipActionPerformed(evt);
+            }
+        });
+        getContentPane().add(offclip, new org.netbeans.lib.awtextra.AbsoluteConstraints(980, 20, 60, 30));
+
         anhnen.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         anhnen.setForeground(new java.awt.Color(255, 255, 255));
         anhnen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/RES/gamecaro.jpg"))); // NOI18N
@@ -230,7 +247,7 @@ public class CaroForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jcombobancoActionPerformed
 
     private void btnplaywithAIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnplaywithAIActionPerformed
-       String playerName = player2.getText().trim();
+        String playerName = player2.getText().trim();
         if (playerName.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập tên người chơi 1!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
@@ -253,7 +270,7 @@ public class CaroForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnplaywithAIActionPerformed
 
     private void btnplaywithplayerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnplaywithplayerActionPerformed
-       String player1Name = player2.getText().trim();
+        String player1Name = player2.getText().trim();
         String player2Name = player1.getText().trim();
         if (player1Name.isEmpty() || player2Name.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập tên cả hai người chơi!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -267,23 +284,54 @@ public class CaroForm extends javax.swing.JFrame {
         // Start two-player game
         new Play2Players(player1Name, player2Name);
         setVisible(false);
-      
+
 
     }//GEN-LAST:event_btnplaywithplayerActionPerformed
 
     private void btnexitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnexitActionPerformed
         // TODO add your handling code here:
         if (clip != null) {
-        clip.stop();
-        clip.close();
-    }
-    System.exit(0);
+            clip.stop();
+            clip.close();
+        }
+        System.exit(0);
     }//GEN-LAST:event_btnexitActionPerformed
 
     private void btnchampaignActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnchampaignActionPerformed
         // TODO add your handling code here:
+        String playerName = player2.getText().trim();
+        if (playerName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập tên người chơi 1!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        Campaign campaign = new Campaign(playerName);
+        campaign.PlayCamp1();
+        setVisible(false);
     }//GEN-LAST:event_btnchampaignActionPerformed
-    
+
+    private void offclipActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_offclipActionPerformed
+        // TODO add your handling code here:
+        if (clip == null) {
+            return;
+        }
+
+        if (isPlaying) {
+            clip.stop();
+            isPlaying = false;
+            offclip.setIcon(new javax.swing.ImageIcon(getClass().getResource("/RES/icmute.jpg"))); // icon tắt tiếng
+        } else {
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
+            clip.start();
+            isPlaying = true;
+            offclip.setIcon(new javax.swing.ImageIcon(getClass().getResource("/RES/icvolume.jpg"))); // icon có tiếng
+        }
+    }//GEN-LAST:event_offclipActionPerformed
+
+    private void btnhighscoreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnhighscoreActionPerformed
+        // TODO add your handling code here:
+        new HighScoreFrame().setVisible(true);
+    }//GEN-LAST:event_btnhighscoreActionPerformed
+
     private int getBoardSize() {
         String selected = (String) jcombobanco.getSelectedItem();
         if (selected.equals("CARO (3x3)")) {
@@ -295,8 +343,6 @@ public class CaroForm extends javax.swing.JFrame {
         }
     }
 
-   
-    
     /**
      * @param args the command line arguments
      */
@@ -349,6 +395,7 @@ public class CaroForm extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> jcombobanco;
     private javax.swing.JLabel nguoichoi1;
     private javax.swing.JLabel nguoichoi2;
+    private javax.swing.JButton offclip;
     private java.awt.TextField player1;
     private java.awt.TextField player2;
     // End of variables declaration//GEN-END:variables

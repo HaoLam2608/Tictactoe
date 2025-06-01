@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import static com.TicTacToe.JFrameMain.jFrame;
+import com.TicTacToe.TicTacToe.HighScoreManager;
 
 public class CampaignStage1 extends PlayWithAiCaro {
     public static String winner;
@@ -102,7 +103,8 @@ public class CampaignStage1 extends PlayWithAiCaro {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                jFrame.setVisible(true);
+                dispose(); 
+                jFrame.setVisible(true); 
             }
         });
 
@@ -141,24 +143,25 @@ public class CampaignStage1 extends PlayWithAiCaro {
         initGame(); // initialize the game board contents and game variables
     }
 
-    @Override
+     @Override
     public void updateGame(Seed theSeed, int rowSelected, int colSelected) {
-        if (hasWon(theSeed, rowSelected, colSelected)) {  // check for win
+        if (hasWon(theSeed, rowSelected, colSelected)) {
             currentState = (theSeed == Seed.CROSS) ? GameState.CROSS_WON : GameState.NOUGHT_WON;
-
-            if(theSeed == Seed.CROSS){
+            if (theSeed == Seed.CROSS) {
                 winner = Player1Name;
-                int nexStage =  Campaign.stage +1;
-                JOptionPane.showMessageDialog(null,Player1Name+" thắng Stage " + Campaign.stage+ " rồi! Click chuột để chơi tiếp Stage "+nexStage);
+                int nexStage = Campaign.stage + 1;
+                JOptionPane.showMessageDialog(null, Player1Name + " thắng Stage " + Campaign.stage + " rồi! Click chuột để chơi tiếp Stage " + nexStage);
+                // Ghi điểm cao
+                HighScoreManager manager = new HighScoreManager();
+                manager.addScore(Player1Name, 5); // +5 điểm cho hoàn thành Stage 1
                 Campaign.stage++;
-            }
-            else {
+            } else {
                 winner = "nought";
-                JOptionPane.showMessageDialog(null, Player1Name + " đã thua campiagn rồi");
+                JOptionPane.showMessageDialog(null, Player1Name + " đã thua campaign rồi");
             }
-        } else if (isDraw()) {  // check for draw
+        } else if (isDraw()) {
             currentState = GameState.DRAW;
-            JOptionPane.showMessageDialog(null,"Hòa rồi! Click chuột để chơi lại");
+            JOptionPane.showMessageDialog(null, "Hòa rồi! Campaign kết thúc.");
         }
     }
 }
