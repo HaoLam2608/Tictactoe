@@ -1,6 +1,7 @@
 package com.TicTacToe.TicTacToe;
 
 import com.TicTacToe.EasyBot;
+import static com.TicTacToe.TicTacToe.JFrameMain.jFrame;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 import javax.swing.*;
 
-import static com.TicTacToe.JFrameMain.jFrame;
 
 /**
  * Tic-Tac-Toe: Two-player Graphics version with Simple-OO
@@ -305,20 +305,35 @@ public class PlayWithAI extends Play2Players {
     private int rows, cols;
     private Seed botSeed;
     private Seed playerSeed;
-    private int[] attackScores = new int[]{0, 10, 600, 3500, 40000000, 70000, 1000000};
-    private int[] defenseScores = new int[]{0, 7, 700, 10000, 100000, 67000, 500000};
+    private int[] attackScores ;
+    private int[] defenseScores;
     private final long MAX_SCORE = 100000000;
-    private int maxDepth = 2;
+    private int maxDepth;
 
     public MinimaxHeuristicBot(int rows, int cols, Seed botSeed, Seed playerSeed) {
         this.rows = rows;
         this.cols = cols;
         this.botSeed = botSeed;
         this.playerSeed = playerSeed;
+        
+        // Điều chỉnh tham số theo kích thước bàn cờ
+        if (rows <= 3 && cols <= 3) {
+            this.maxDepth = 9; // Đủ để tính toán toàn bộ trò chơi
+            this.attackScores = new int[]{0, 3, 30, 1000}; // Tăng điểm cho các nước đi chiến lược
+            this.defenseScores = new int[]{0, 5, 50, 1000};
+        } else if (rows <= 4 && cols <= 4) {
+            this.maxDepth = 5;
+            this.attackScores = new int[]{0, 5, 50, 500, 10000};
+            this.defenseScores = new int[]{0, 8, 80, 800, 10000};
+        } else {
+            this.maxDepth = 2;
+            this.attackScores = new int[]{0, 10, 600, 3500, 100000, 1000000};
+            this.defenseScores = new int[]{0, 15, 500, 3000, 50000, 800000};
+        }
     }
 
     public String getBestMove(Seed[][] board) {
-        // Check for immediate winning move for bot
+        // Kiểm tra nước đi chiến thắng ngay lập tức cho bot
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (board[i][j] == Seed.EMPTY) {
@@ -331,7 +346,7 @@ public class PlayWithAI extends Play2Players {
                 }
             }
         }
-        // Check for immediate blocking of player's win
+        // Kiểm tra xem chặn ngay lập tức chiến thắng của người chơi
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (board[i][j] == Seed.EMPTY) {
@@ -344,22 +359,71 @@ public class PlayWithAI extends Play2Players {
                 }
             }
         }
-        // Check for player's three-in-a-row to block
+         // Chiến lược cho bàn 3x3 và 4x4
+        if (rows <= 4 && cols <= 4) {
+            // Ưu tiên ô trung tâm nếu bàn cờ trống
+            if (isBoardEmpty(board)) {
+                int centerRow = rows / 2;
+                int centerCol = cols / 2;
+                if (board[centerRow][centerCol] == Seed.EMPTY) {
+                    return centerRow + " " + centerCol;
+                }
+            }
+            
+            // Chiến lược góc cho bàn 3x3
+            if (rows == 3 && cols == 3) {
+                String cornerMove = getBestCornerMove(board);
+                if (cornerMove != null) {
+                    return cornerMove;
+                }
+            }
+        }
+        //Kiểm tra xem người chơi có ba quân liên tiếp để chặn không
         int[] blockMove = findThreeInARowBlock(board);
         if (blockMove != null) {
             return blockMove[0] + " " + blockMove[1];
         }
-        // If board is empty, choose center
+        // Nếu bàn cờ trống chọn ô trung tâm
         if (isBoardEmpty(board)) {
             return (rows / 2) + " " + (cols / 2);
         }
-        // Use Minimax for other cases
+        // sử dụng minimax
         Move bestMove = minimax(board, maxDepth, true, Long.MIN_VALUE, Long.MAX_VALUE);
         return bestMove.row + " " + bestMove.col;
     }
-
+    //  phương thức cho chiến lược góc (3x3)
+    private String getBestCornerMove(Seed[][] board) {
+        int[][] corners = {{0,0}, {0,2}, {2,0}, {2,2}};
+        List<String> emptyCorners = new ArrayList<>();
+        
+        for (int[] corner : corners) {
+            if (board[corner[0]][corner[1]] == Seed.EMPTY) {
+                emptyCorners.add(corner[0] + " " + corner[1]);
+            }
+        }
+        
+        if (!emptyCorners.isEmpty()) {
+            // Nếu đối thủ chiếm trung tâm, chọn góc đối diện
+            if (board[1][1] == playerSeed && emptyCorners.size() >= 2) {
+                // Tìm góc đối diện với góc đã được đánh
+                for (String corner : emptyCorners) {
+                    String[] parts = corner.split(" ");
+                    int row = Integer.parseInt(parts[0]);
+                    int col = Integer.parseInt(parts[1]);
+                    if (board[2-row][2-col] != Seed.EMPTY) {
+                        return (2-row) + " " + (2-col);
+                    }
+                }
+            }
+            // Ngẫu nhiên chọn một góc trống
+            Random rand = new Random();
+            return emptyCorners.get(rand.nextInt(emptyCorners.size()));
+        }
+        
+        return null;
+    }
     private int[] findThreeInARowBlock(Seed[][] board) {
-        // Check rows
+        // Kiểm tra hàng
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j <= cols - 5; j++) {
                 int count = 0;
@@ -385,7 +449,7 @@ public class PlayWithAI extends Play2Players {
                 }
             }
         }
-        // Check columns
+        // Kiểm tra cột
         for (int i = 0; i <= rows - 5; i++) {
             for (int j = 0; j < cols; j++) {
                 int count = 0;
@@ -411,7 +475,7 @@ public class PlayWithAI extends Play2Players {
                 }
             }
         }
-        // Check diagonals (right)
+        // Kiểm tra chéo phải
         for (int i = 0; i <= rows - 5; i++) {
             for (int j = 0; j <= cols - 5; j++) {
                 int count = 0;
@@ -439,7 +503,7 @@ public class PlayWithAI extends Play2Players {
                 }
             }
         }
-        // Check diagonals (left)
+        // Kiểm tra chéo trái
         for (int i = 0; i <= rows - 5; i++) {
             for (int j = 4; j < cols; j++) {
                 int count = 0;
@@ -471,33 +535,31 @@ public class PlayWithAI extends Play2Players {
     }
 
     private int getAdjacentEmptyCol(int[] playerIndices, int[] emptyIndices, int playerCount, int emptyCount) {
-        // Find min and max indices of player pieces
+        // Tìm chỉ số min và max của quân cờ của người chơi
         int minPlayerIdx = Integer.MAX_VALUE;
         int maxPlayerIdx = Integer.MIN_VALUE;
         for (int i = 0; i < playerCount; i++) {
             minPlayerIdx = Math.min(minPlayerIdx, playerIndices[i]);
             maxPlayerIdx = Math.max(maxPlayerIdx, playerIndices[i]);
         }
-        // Return the empty cell immediately before or after the player pieces
+        // Trả lại ô trống ngay trước hoặc sau quân cờ của người chơi
         for (int i = 0; i < emptyCount; i++) {
             if (emptyIndices[i] == minPlayerIdx - 1 || emptyIndices[i] == maxPlayerIdx + 1) {
                 return emptyIndices[i];
             }
         }
-        // Fallback to any empty cell if no adjacent one is found
+        // Quay lại bất kỳ ô trống nào nếu không tìm thấy ô liền kề
         return emptyCount > 0 ? emptyIndices[0] : -1;
     }
 
     private int[] getAdjacentEmptyCell(int[][] playerCells, int[][] emptyCells, int playerCount, int emptyCount) {
-        // Find min and max indices of player pieces (based on row or col)
         int minPlayerIdx = Integer.MAX_VALUE;
         int maxPlayerIdx = Integer.MIN_VALUE;
         for (int i = 0; i < playerCount; i++) {
-            int idx = playerCells[i][0]; // Use row for diagonal comparison
+            int idx = playerCells[i][0]; 
             minPlayerIdx = Math.min(minPlayerIdx, idx);
             maxPlayerIdx = Math.max(maxPlayerIdx, idx);
         }
-        // Return the empty cell immediately before or after the player pieces
         for (int i = 0; i < emptyCount; i++) {
             int row = emptyCells[i][0];
             int col = emptyCells[i][1];
@@ -505,7 +567,6 @@ public class PlayWithAI extends Play2Players {
                 return new int[]{row, col};
             }
         }
-        // Fallback to any empty cell if no adjacent one is found
         return emptyCount > 0 ? new int[]{emptyCells[0][0], emptyCells[0][1]} : null;
     }
 
@@ -519,12 +580,37 @@ public class PlayWithAI extends Play2Players {
         }
         return true;
     }
-
+    // Đánh giá độ ưu tiên của nước đi (cao hơn = tốt hơn)
+    private int evaluateMovePriority(int row, int col) {
+        // Ưu tiên trung tâm
+        if (row == rows/2 && col == cols/2) return 100;
+        
+        // Ưu tiên các góc (cho bàn 3x3)
+        if (rows == 3 && cols == 3) {
+            if ((row == 0 || row == 2) && (col == 0 || col == 2)) return 50;
+        }
+        
+        // Ưu tiên các ô không phải cạnh (cho bàn 4x4)
+        if (rows == 4 && cols == 4) {
+            if (row > 0 && row < 3 && col > 0 && col < 3) return 30;
+        }
+        
+        return 0;
+    }
     private Move minimax(Seed[][] board, int depth, boolean isMaximizing, long alpha, long beta) {
         if (depth == 0 || isTerminalNode(board)) {
             return new Move(-1, -1, evaluateBoard(board));
         }
         List<Move> possibleMoves = generatePossibleMoves(board);
+         // Sắp xếp các nước đi để alpha-beta pruning hiệu quả hơn
+        if (rows <= 4 && cols <= 4) {
+            possibleMoves.sort((m1, m2) -> {
+                // Ưu tiên trung tâm và các góc (cho 3x3)
+                int score1 = evaluateMovePriority(m1.row, m1.col);
+                int score2 = evaluateMovePriority(m2.row, m2.col);
+                return Integer.compare(score2, score1);
+            });
+        }
         if (isMaximizing) {
             Move bestMove = new Move(-1, -1, Long.MIN_VALUE);
             for (Move move : possibleMoves) {
@@ -699,13 +785,17 @@ public class PlayWithAI extends Play2Players {
         return score;
     }
 
+   // hàm evaluateWindow cho bàn nhỏ
     private long evaluateWindow(Seed[][] board, int row, int col, int rowDir, int colDir, Seed seed, boolean isBot) {
+        int winLength = Math.min(3, Math.min(rows, cols));
         int count = 0;
         int empty = 0;
         int opponentCount = 0;
-        for (int i = 0; i < 5; i++) {
+        
+        for (int i = 0; i < winLength; i++) {
             int currentRow = row + i * rowDir;
             int currentCol = col + i * colDir;
+            
             if (board[currentRow][currentCol] == seed) {
                 count++;
             } else if (board[currentRow][currentCol] == Seed.EMPTY) {
@@ -714,24 +804,42 @@ public class PlayWithAI extends Play2Players {
                 opponentCount++;
             }
         }
-        if (count > 0 && opponentCount > 0) {
-            return 0;
+        
+        if (count > 0 && opponentCount > 0) return 0;
+        
+        // Điểm số linh hoạt theo winLength
+        if (count == winLength) return isBot ? MAX_SCORE : -MAX_SCORE;
+        
+        int index = Math.min(count, attackScores.length - 1);
+        if (empty == winLength - count) {
+            long baseScore = isBot ? attackScores[index] : -defenseScores[index];
+            
+            // Tăng điểm cho các cửa sổ có thể mở rộng (đặc biệt quan trọng với bàn nhỏ)
+            if (canExtend(board, row, col, rowDir, colDir, seed, winLength)) {
+                baseScore *= 1.5;
+            }
+            
+            return baseScore;
         }
-        if (!isBot && count == 3 && empty == 2) {
-            return -MAX_SCORE / 2;
-        }
-        if (count == 5) {
-            return isBot ? MAX_SCORE : -MAX_SCORE;
-        } else if (count == 4 && empty == 1) {
-            return isBot ? attackScores[4] / 2 : -defenseScores[4] / 2;
-        } else if (count == 3 && empty == 2) {
-            return isBot ? attackScores[3] / 3 : -defenseScores[3] / 3;
-        } else if (count == 2 && empty == 3) {
-            return isBot ? attackScores[2] / 4 : -defenseScores[2] / 4;
-        } else if (count == 1 && empty == 4) {
-            return isBot ? attackScores[1] / 5 : -defenseScores[1] / 5;
-        }
+        
         return 0;
+    }
+    private boolean canExtend(Seed[][] board, int row, int col, int rowDir, int colDir, Seed seed, int winLength) {
+        // Kiểm tra phía trước
+        int nextRow = row + winLength * rowDir;
+        int nextCol = col + winLength * colDir;
+        if (nextRow >= 0 && nextRow < rows && nextCol >= 0 && nextCol < cols) {
+            if (board[nextRow][nextCol] == Seed.EMPTY) return true;
+        }
+        
+        // Kiểm tra phía sau
+        int prevRow = row - rowDir;
+        int prevCol = col - colDir;
+        if (prevRow >= 0 && prevRow < rows && prevCol >= 0 && prevCol < cols) {
+            if (board[prevRow][prevCol] == Seed.EMPTY) return true;
+        }
+        
+        return false;
     }
 
     public class Move {

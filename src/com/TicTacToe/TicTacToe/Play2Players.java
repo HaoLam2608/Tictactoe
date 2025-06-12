@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-import static com.TicTacToe.JFrameMain.jFrame;
+import static com.TicTacToe.TicTacToe.JFrameMain.jFrame;
 
 /**
  * Tic-Tac-Toe: Two-player Graphics version with Simple-OO

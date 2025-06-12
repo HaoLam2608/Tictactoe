@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class GetAndSetHighScore {
-    public static final String FILE_NAME = "C:\\Test\\TestText.txt";
+    public static final String FILE_NAME = "D:\\Test\\TestText.txt";
     //file được định dạng theo
     //Thắng;ABC;ABC;XYZ;SDF ...
     //Thua;DBC;GHJ;XXX;...

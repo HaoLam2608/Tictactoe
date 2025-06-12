@@ -1,12 +1,12 @@
 package com.TicTacToe.Campaign;
 
 import com.TicTacToe.Caro.PlayWithAiCaro;
+import static com.TicTacToe.TicTacToe.JFrameMain.jFrame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import static com.TicTacToe.JFrameMain.jFrame;
 
 public class CampaignStage1 extends PlayWithAiCaro {
     public static String winner;

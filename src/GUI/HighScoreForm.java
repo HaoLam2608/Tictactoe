@@ -1,5 +1,8 @@
-package com.TicTacToe;
+package GUI;
 
+import GUI.CaroForm;
+import com.TicTacToe.GetAndSetHighScore;
+import static com.TicTacToe.TicTacToe.JFrameMain.jFrame;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -9,13 +12,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Vector;
 
-import static com.TicTacToe.JFrameMain.jFrame;
 
 public class HighScoreForm extends JFrame {
 
     private JTable tblHighScore;
     private JPanel panel1;
     private DefaultTableModel model;
+    
 
     void CreateAndShow() {
         new File("D:\\Test").mkdir();

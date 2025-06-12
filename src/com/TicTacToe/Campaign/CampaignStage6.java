@@ -1,5 +1,6 @@
 package com.TicTacToe.Campaign;
 
+import static com.TicTacToe.TicTacToe.JFrameMain.jFrame;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -7,7 +8,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import static com.TicTacToe.JFrameMain.jFrame;
 
 public class CampaignStage6 extends CampaignStage1 {
     /**
